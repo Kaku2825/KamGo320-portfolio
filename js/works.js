@@ -5,7 +5,7 @@
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=18';
+import { clamp, Glide } from './utils.js?v=19';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
@@ -210,7 +210,8 @@ export class WorksSection {
      省流量模式下完全不补——只在滑到附近时才取 */
   #preloadRest() {
     clearTimeout(this._restT);
-    if (navigator.connection?.saveData) return;
+    /* 手机 / 省流量：不后台铺满全卷，只按 ±2 窗口随滑随取（省几 MB 流量） */
+    if (innerWidth <= 900 || navigator.connection?.saveData) return;
     let k = 0;
     const pump = () => {
       if (this.mode !== 'detail') return;
