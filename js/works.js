@@ -5,7 +5,7 @@
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=16';
+import { clamp, Glide } from './utils.js?v=17';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
@@ -13,7 +13,7 @@ const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
 /* 两档图：LO = 1.5× 速览图（先出画面，约 220KB/页），
    HI = 3× 高清图（只在放大/停留后换入，约 1.3MB/页） */
 const LO = page => `assets/pages/lo/${page}.webp?v=1`;
-const HI = page => `assets/pages/${page}.webp?v=6`;
+const HI = page => `assets/pages/${page}.webp?v=7`;
 
 export class WorksSection {
   constructor(el, app) {
@@ -402,9 +402,10 @@ export class WorksSection {
       history.replaceState(null, '', '#' + w.id);
 
       /* 停在这一页 1.1s 后才换高清：滑动途中不抢带宽。
-         桌面才自动换；手机只在用户主动放大时换（省流量） */
+         只在桌面、且非省流量 / 非 2G 时自动换；手机等用户主动放大再换 */
       clearTimeout(this._hiT);
-      if (innerWidth > 900 && !navigator.connection?.saveData) {
+      const c = navigator.connection;
+      if (innerWidth > 900 && !c?.saveData && !/2g/.test(c?.effectiveType ?? '')) {
         this._hiT = setTimeout(() => {
           if (this.mode === 'detail' && this._curPage === idx) this.#loadHi(idx);
         }, 1100);
