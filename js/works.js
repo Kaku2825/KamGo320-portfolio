@@ -5,7 +5,7 @@
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=19';
+import { clamp, Glide } from './utils.js?v=20';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
@@ -77,21 +77,24 @@ export class WorksSection {
     });
   }
 
-  /* 卡片阵列：长按拖拽 = 拖动/横滑（有溢出就真滚，没溢出就带阻尼跟随再回弹） */
+  /* 卡片阵列：长按拖拽 = 拖动/横滑（有溢出就真滚，没溢出就带阻尼跟随再回弹）。
+     触屏同样接管：手势方向在起始几像素处锁定——横滑走 dx，竖滑走 dy。
+     这样手机竖着拿（系统竖屏）上下滑、或把手机横过来但系统仍锁竖屏
+     （手指"横向"滑在系统里其实是竖向）都能横移阵列，不需要任何横屏提示 */
   #bindRailDrag() {
     const wrap = this.el.querySelector('.idx-rail-wrap');
     const rail = this.el.querySelector('.idx-rail');
-    let on = false, cap = false, id = null, moved = 0;
-    let sx = 0, s0 = 0, lx = 0, lt = 0, v = 0, raf = 0;
+    let on = false, cap = false, lock = false, touch = false, axis = 'x', id = null, moved = 0;
+    let sx = 0, sy = 0, s0 = 0, lx = 0, lt = 0, v = 0, raf = 0;
     const stop = () => { cancelAnimationFrame(raf); raf = 0; };
     const overflow = () => wrap.scrollWidth - wrap.clientWidth > 2;
 
     wrap.addEventListener('pointerdown', e => {
       if (this.mode !== 'index' || e.button !== 0) return;
-      if (e.pointerType === 'touch') return;        // 触屏交给原生滚动，不抢
-      e.preventDefault();                    // 按下即掐断原生选区 / 图片拖影
-      on = true; cap = false; id = e.pointerId; moved = 0;
-      sx = lx = e.clientX; lt = performance.now(); v = 0;
+      if (e.pointerType !== 'touch') e.preventDefault();   // 鼠标：按下即掐断选区 / 图片拖影
+      on = true; cap = false; lock = false; axis = 'x'; moved = 0; id = e.pointerId;
+      touch = e.pointerType === 'touch';
+      sx = lx = e.clientX; sy = e.clientY; lt = performance.now(); v = 0;
       s0 = wrap.scrollLeft;
       stop();
       rail.style.transition = 'none';
@@ -100,16 +103,27 @@ export class WorksSection {
 
     wrap.addEventListener('pointermove', e => {
       if (!on || e.pointerId !== id) return;
-      const dx = e.clientX - lx, now = performance.now();
-      v = v * .7 + (dx / Math.max(now - lt, 1)) * .3;   // px/ms
-      lx = e.clientX; lt = now;
-      const total = e.clientX - sx;
-      moved = Math.max(moved, Math.abs(total));
-      /* 越过阈值才抓指针：在此之前不抢事件，卡片点击照常生效 */
+      const now = performance.now();
+      const tx = e.clientX - sx, ty = e.clientY - sy;
+      moved = Math.max(moved, Math.abs(tx), Math.abs(ty));
+      /* 越过 4px 才抓指针：在此之前不抢事件，卡片点击照常生效 */
       if (moved > 4 && !cap) { cap = true; wrap.setPointerCapture(id); }
-      if (moved <= 4) return;
+      if (!lock && moved > 4) {
+        lock = true;
+        /* 只有触屏才允许"竖滑当横移"；鼠标（桌面版）始终按横向处理，行为不变 */
+        axis = touch && Math.abs(ty) > Math.abs(tx) ? 'y' : 'x';
+      }
+      if (!lock) return;
+
+      const p = axis === 'x' ? e.clientX : e.clientY;      // 本轴上的实时位置
+      const d = p - lx;                                    // 本轴增量
+      lx = p;
+      v = v * .7 + (d / Math.max(now - lt, 1)) * .3;       // px/ms
+      lt = now;
+
+      const total = axis === 'x' ? tx : ty;                // 本轴累计位移
       if (overflow()) {
-        wrap.scrollLeft = s0 - total;                   // 真滚动
+        wrap.scrollLeft = s0 - total;                      // 真滚动
       } else {
         /* 阵列比视口窄：给一段阻尼跟随，拖多少跟多少（最多 ±110px） */
         rail.style.transform = `translateX(${clamp(total * .55, -110, 110)}px)`;
@@ -455,7 +469,8 @@ export class WorksSection {
   #bindPointer() {
     const pts = new Map();
     let mode = null;             // 'slide' | 'pan' | 'pinch'
-    let startX = 0, startV = 0, lastX = 0, lastT = 0, v = 0;
+    let startX = 0, startY = 0, startV = 0, lastX = 0, lastT = 0, v = 0;
+    let axis = 'x', lock = false, touchSlide = false;
     let pinchD0 = 0, pinchZ0 = 1, pinchCX = 0, pinchCY = 0;
 
     const currentZoom = () => {
@@ -484,7 +499,10 @@ export class WorksSection {
 
       const z = currentZoom().z;
       mode = z > 1 ? 'pan' : 'slide';
-      startX = lastX = e.clientX; lastT = performance.now(); v = 0;
+      startX = lastX = e.clientX;
+      startY = e.clientY;
+      axis = 'x'; lock = false; touchSlide = e.pointerType === 'touch';
+      lastT = performance.now(); v = 0;
       startV = this.glide?.target ?? 0;
       if (mode === 'pan') this._panStart = { z: currentZoom(), px: e.clientX, py: e.clientY };
       this._dragging = true;
@@ -513,11 +531,26 @@ export class WorksSection {
         return;
       }
       if (mode === 'slide') {
-        const dx = e.clientX - lastX;
+        const tx = e.clientX - startX, ty = e.clientY - startY;
+        /* 轴向锁定：起步 6px 内判定横滑还是竖滑，之后整段手势只认这一轴。
+           竖滑同样推进长卷 —— 手机竖屏能上下滑翻页；系统锁竖屏、人把手机
+           横过来时，手指"横向"的滑动在系统坐标里正是竖向，照样翻页。 */
+        if (!lock && Math.hypot(tx, ty) > 6) {
+          lock = true;
+          /* 只有触屏才把竖向手势当横向位移；鼠标（桌面版）恒为横向，行为不变 */
+          axis = touchSlide && Math.abs(ty) > Math.abs(tx) ? 'y' : 'x';
+          lastX = axis === 'x' ? e.clientX : e.clientY;   // 换轴时重记基准，避免跳变
+          lastT = performance.now(); v = 0;
+        }
+        if (!lock) return;
+
+        const pos = axis === 'x' ? e.clientX : e.clientY;
+        const dx = pos - lastX;                           // 本轴增量
         const now = performance.now();
         v = v * .7 + (dx / Math.max(now - lastT, 1)) * .3;   // px/ms
-        lastX = e.clientX; lastT = now;
-        const raw = startV - (e.clientX - startX) * 1.4;
+        lastX = pos; lastT = now;
+
+        const raw = startV - (axis === 'x' ? tx : ty) * 1.4;
         /* 拖到长卷尽头仍继续拖 → 累积过冲，超过阈值即无极退出 */
         if (raw > this.max() + 2) {
           this._over = (this._over || 0) + Math.max(-dx, 0);

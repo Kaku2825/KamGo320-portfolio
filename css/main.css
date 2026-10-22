@@ -55,6 +55,7 @@
 html, body {
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;          /* 手机上滑动时不触发下拉刷新 / 边缘回弹 */
   background: var(--field);
   color: var(--ink);
   font-family: var(--font-display);
@@ -900,73 +901,11 @@ body.in-detail .frame-bottom { z-index: 5; }
 }
 
 /* ==========================================================================
-   手机竖屏：横屏引导（横屏后自动消失；可选择继续竖屏）
+   手机：不弹"请横屏"，竖屏直接可用
+   —— 手指纵向滑动在 JS 里被当作横向位移（见 works.js 的轴向锁定），
+      系统锁竖屏、人把手机横过来时，手指"横向"滑在系统里正是竖向 → 一样翻页
    ========================================================================== */
-.rotate-hint { display: none; }
-
-@media (max-width: 620px) and (orientation: portrait) {
-  body:not(.allow-portrait) .rotate-hint {
-    position: fixed;
-    inset: 0;
-    z-index: 300;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 32px 28px;
-    text-align: center;
-    background: var(--field);
-  }
-  body:not(.allow-portrait) .rotate-hint ~ * { pointer-events: none; }
-}
-
-.rh-phone {
-  width: 46px; height: 76px;
-  border: 1px solid var(--hl);
-  border-radius: 7px;
-  position: relative;
-  margin-bottom: 10px;
-  animation: phoneRotate 2.8s var(--ease-push) infinite;
-}
-.rh-phone::after {
-  content: '';
-  position: absolute;
-  left: 50%; bottom: 6px;
-  width: 1px; height: 10px;
-  background: var(--hl);
-  transform: translateX(-50%);
-  opacity: .5;
-}
-@keyframes phoneRotate {
-  0%, 22%   { transform: rotate(0deg); }
-  48%, 78%  { transform: rotate(-90deg); }
-  100%      { transform: rotate(0deg); }
-}
-.rh-title {
-  font-family: var(--font-cn);
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: .16em;
-  color: var(--ink);
-}
-.rh-sub {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: .34em;
-  color: var(--dim);
-}
-.rh-skip {
-  margin-top: 18px;
-  padding: 10px 18px;
-  border: 1px solid var(--rule);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: .16em;
-  color: var(--dim);
-  pointer-events: auto;
-}
-.rh-skip:active { color: var(--hl); border-color: var(--hl); }
+.idx-rail-wrap, .detail { touch-action: none; }
 
 /* ==========================================================================
    手机横屏（矮视口）：压缩留白，保证首屏完整

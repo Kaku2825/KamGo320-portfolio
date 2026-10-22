@@ -85,19 +85,22 @@ export function renderCover(el, app) {
   }, { passive: true });
 
   /* 长按拖动 / 滑动 = 进作品集：向下拖或向左拖过阈值即进入，
-     与滚轮、按钮同一出口；按住文字也不起选区（全站已禁选） */
+     与滚轮、按钮同一出口；按住文字也不起选区（全站已禁选）。
+     触屏上纵向两个方向都算"推进"——竖屏随手滑，或把手机横过来但系统
+     仍锁竖屏时（手指"横向"的滑动在系统里是竖向），都能进作品集 */
   let drag = null;
   el.addEventListener('pointerdown', e => {
     if (app.current !== 'cover' || e.button !== 0) return;
     if (e.target.closest('button, a')) return;
-    drag = { x: e.clientX, y: e.clientY };
+    drag = { x: e.clientX, y: e.clientY, touch: e.pointerType === 'touch' };
   });
   el.addEventListener('pointerup', e => {
     if (!drag) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    const touch = drag.touch;
     drag = null;
     if (app.current !== 'cover' || app.transitioning) return;
-    if (dy > 60 || dx < -60) app.goto('works');
+    if (dy > 60 || dx < -60 || (touch && dy < -60)) app.goto('works');
   });
   el.addEventListener('pointercancel', () => { drag = null; });
 }
