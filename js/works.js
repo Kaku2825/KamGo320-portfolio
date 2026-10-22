@@ -5,7 +5,7 @@
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=17';
+import { clamp, Glide } from './utils.js?v=18';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
@@ -152,7 +152,7 @@ export class WorksSection {
       <div class="detail-strip">
         ${this.panels.map((pn, k) => `
           <figure class="page-panel" style="--work-field:${pn.work.field};--work-ink:${pn.work.ink};--work-hl:${pn.work.hl}">
-            <img ${k < 2 ? `src="${LO(pn.page)}"` : `data-src="${LO(pn.page)}"`}
+            <img data-src="${LO(pn.page)}"
                  data-hi="${HI(pn.page)}"
                  alt="${pn.work.title} · ${pn.page}" decoding="async" draggable="false">
           </figure>`).join('')}

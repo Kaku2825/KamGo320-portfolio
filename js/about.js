@@ -2,7 +2,7 @@
    左侧巨型字标（Big Shoulders）+ 底部状态行，
    右侧 A/B/C 键位数据列（FOCUS / CONTACT）。 */
 
-import { SITE } from './data.js?v=17';
+import { SITE } from './data.js?v=18';
 
 export function renderAbout(el, app) {
   const a = SITE.about;
