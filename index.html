@@ -8,9 +8,17 @@
   <meta property="og:title" content="建筑学作品集 · Portfolio">
   <meta property="og:description" content="Selected Works 2022—2026">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='7' height='18' fill='%23CC9933'/%3E%3Crect x='17' y='7' width='7' height='18' fill='%23d8dbd3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/main.css?v=18">
+  <link rel="stylesheet" href="css/main.css?v=19">
 </head>
 <body>
+
+  <!-- 手机竖屏：提示横屏（竖屏下交互与版式不完整） -->
+  <div class="rotate-hint" id="rotate-hint" role="dialog" aria-label="请横屏浏览">
+    <span class="rh-phone" aria-hidden="true"></span>
+    <p class="rh-title">请把手机横过来</p>
+    <p class="rh-sub">ROTATE TO LANDSCAPE</p>
+    <button class="rh-skip" id="rh-skip" type="button">仍然竖屏浏览</button>
+  </div>
 
   <!-- 固定外框：四角信息 + 顶部刻度，所有板块之上 -->
   <header class="frame frame-top">
@@ -44,6 +52,6 @@
   <div class="grain" aria-hidden="true"></div>
   <div class="toast" id="toast"></div>
 
-  <script type="module" src="js/main.js?v=15"></script>
+  <script type="module" src="js/main.js?v=16"></script>
 </body>
 </html>

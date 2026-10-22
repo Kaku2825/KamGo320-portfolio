@@ -1,10 +1,10 @@
 /* main.js — 应用入口：板块推进 / 导航 / 刻度 / hash 路由 */
 
-import { SITE } from './data.js?v=15';
-import { onFrame } from './utils.js?v=15';
-import { renderCover } from './cover.js?v=15';
-import { WorksSection } from './works.js?v=15';
-import { renderAbout } from './about.js?v=15';
+import { SITE } from './data.js?v=16';
+import { onFrame } from './utils.js?v=16';
+import { renderCover } from './cover.js?v=16';
+import { WorksSection } from './works.js?v=16';
+import { renderAbout } from './about.js?v=16';
 
 class App {
   constructor() {
@@ -176,6 +176,16 @@ class App {
         e.preventDefault();
         this.goto(a.dataset.nav);
       }));
+
+    /* 手机竖屏引导：点「仍然竖屏浏览」后本次会话不再拦截 */
+    const rhSkip = document.getElementById('rh-skip');
+    if (rhSkip) {
+      try { if (sessionStorage.getItem('rh-allow') === '1') document.body.classList.add('allow-portrait'); } catch {}
+      rhSkip.addEventListener('click', () => {
+        document.body.classList.add('allow-portrait');
+        try { sessionStorage.setItem('rh-allow', '1'); } catch {}
+      });
+    }
 
     /* 微信号复制（事件委托：复制入口在 footer / about 板块都可能存在） */
     const toast = document.getElementById('toast');

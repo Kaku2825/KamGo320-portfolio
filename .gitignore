@@ -1,0 +1,7 @@
+# 本地临时脚本（不随仓库发布）
+/.t*.py
+/.m*.py
+/.perf.py
+/.shot.py
+/.drag-test.py
+/.tmp/

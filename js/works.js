@@ -5,10 +5,15 @@
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=15';
+import { clamp, Glide } from './utils.js?v=16';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';
+
+/* 两档图：LO = 1.5× 速览图（先出画面，约 220KB/页），
+   HI = 3× 高清图（只在放大/停留后换入，约 1.3MB/页） */
+const LO = page => `assets/pages/lo/${page}.webp?v=1`;
+const HI = page => `assets/pages/${page}.webp?v=6`;
 
 export class WorksSection {
   constructor(el, app) {
@@ -63,6 +68,13 @@ export class WorksSection {
       if (this._suppressClick) return;      // 刚才是拖拽，不是点击
       this.open(i);
     }));
+
+    /* 悬停 / 聚焦即预热该作品首页的低清图：点开时第一屏基本已在缓存里 */
+    this.cards.forEach((c, i) => {
+      const warm = () => { const im = new Image(); im.decoding = 'async'; im.src = LO(this.works[i].pages[0]); };
+      c.addEventListener('pointerenter', warm, { once: true });
+      c.addEventListener('focus', warm, { once: true });
+    });
   }
 
   /* 卡片阵列：长按拖拽 = 拖动/横滑（有溢出就真滚，没溢出就带阻尼跟随再回弹） */
@@ -140,7 +152,8 @@ export class WorksSection {
       <div class="detail-strip">
         ${this.panels.map((pn, k) => `
           <figure class="page-panel" style="--work-field:${pn.work.field};--work-ink:${pn.work.ink};--work-hl:${pn.work.hl}">
-            <img ${k < 3 ? `src="assets/pages/${pn.page}.webp?v=6"` : `data-src="assets/pages/${pn.page}.webp?v=6"`}
+            <img ${k < 2 ? `src="${LO(pn.page)}"` : `data-src="${LO(pn.page)}"`}
+                 data-hi="${HI(pn.page)}"
                  alt="${pn.work.title} · ${pn.page}" decoding="async" draggable="false">
           </figure>`).join('')}
       </div>
@@ -165,6 +178,21 @@ export class WorksSection {
     return true;
   }
 
+  /* 高清图换入：先离屏加载，完成后再替换 src ——
+     旧的低清图会一直显示到高清解码完成，不会闪白 */
+  #loadHi(k) {
+    const img = this.pageImgs[k];
+    if (!img || img.dataset.hiDone === '1') return;
+    const url = img.dataset.hi;
+    if (!url) return;
+    img.dataset.hiDone = '1';
+    const pre = new Image();
+    pre.decoding = 'async';
+    pre.onload = () => { if (this.mode === 'detail') img.src = url; };
+    pre.onerror = () => { img.dataset.hiDone = ''; };
+    pre.src = url;
+  }
+
   /* 邻近预载：基础 ±2 窗口，再按当前滑动速度向运动方向额外展开——
      快速惯性抛掷时能提前好几页起载，避免滑过去还是空白 */
   #preloadAround(idx, vel = 0) {
@@ -178,10 +206,11 @@ export class WorksSection {
     }
   }
 
-  /* 空闲后按低优先级把剩余页逐张补齐（错峰，不抢当前页带宽）——
-     之后无论滑多快都不可能再遇到空白 */
+  /* 空闲后按低优先级把剩余页的低清图逐张补齐（错峰，不抢当前页带宽）。
+     省流量模式下完全不补——只在滑到附近时才取 */
   #preloadRest() {
     clearTimeout(this._restT);
+    if (navigator.connection?.saveData) return;
     let k = 0;
     const pump = () => {
       if (this.mode !== 'detail') return;
@@ -190,9 +219,9 @@ export class WorksSection {
         const i = k++;
         if (!this.pageImgs[i].getAttribute('src')) { this.#loadImg(i, 'low'); done = false; break; }
       }
-      if (!done) this._restT = setTimeout(pump, 90);
+      if (!done) this._restT = setTimeout(pump, 150);
     };
-    this._restT = setTimeout(pump, 1200);
+    this._restT = setTimeout(pump, 1500);
   }
 
   /* ================= 底部轴 ================= */
@@ -261,6 +290,7 @@ export class WorksSection {
     if (this.mode !== 'detail' || this.transitioning) return;
     this.transitioning = true;
     clearTimeout(this._restT);
+    clearTimeout(this._hiT);
     const wi = this.works.indexOf(this._curWork ?? this.works[0]);
     const card = this.cards[wi] ?? this.cards[0];
     const rect = card.getBoundingClientRect();
@@ -370,6 +400,15 @@ export class WorksSection {
         `${pn.page.toUpperCase()} — ${idx + 1} / ${this.panels.length}`;
       this.app.setTicks(idx + 2);
       history.replaceState(null, '', '#' + w.id);
+
+      /* 停在这一页 1.1s 后才换高清：滑动途中不抢带宽。
+         桌面才自动换；手机只在用户主动放大时换（省流量） */
+      clearTimeout(this._hiT);
+      if (innerWidth > 900 && !navigator.connection?.saveData) {
+        this._hiT = setTimeout(() => {
+          if (this.mode === 'detail' && this._curPage === idx) this.#loadHi(idx);
+        }, 1100);
+      }
     }
   }
 
@@ -524,6 +563,8 @@ export class WorksSection {
   #zoomTo(i, z) {
     z = clamp(z, 1, 2.6);
     if (z === 1) { this.zooms.delete(i); this.#applyZoom(i, true); return; }
+    /* 一放大就换高清图：低清图先顶着，高清解码完无缝替换 */
+    if (z > 1.12) this.#loadHi(i);
     /* 无极滑动可能停在页间——首次放大时先把该页平滑对齐到整页位置，
        使图框中心正好落在屏幕中心（随后长卷停在整页上） */
     const prev = this.zooms.get(i)?.z ?? 1;
