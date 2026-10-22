@@ -1,5 +1,5 @@
 /* cover.js — L1 封面
-   排版语言对齐 yourbana.com：巨型字母逐字堆叠（每行不同处理）、
+   巨型字母逐字堆叠（每行不同处理）、
    细竖线 + 旋转 SCROLL/DRAG、右下角计数、大圆几何点缀、纯黑底。 */
 
 export function renderCover(el, app) {
@@ -61,7 +61,7 @@ export function renderCover(el, app) {
     ch.addEventListener('animationend', () => ch.classList.add('done'), { once: true }));
 
   /* 底部跑马灯字条 */
-  const mqText = 'ARCHITECTURE PORTFOLIO — GUO JINTAO — SELECTED WORKS 2022—2026 — SPACE · LIGHT · ORDER — ';
+  const mqText = 'ARCHITECTURE PORTFOLIO — SELECTED WORKS 2022—2026 — SPACE · LIGHT · ORDER — ';
   el.querySelector('#mq-track').innerHTML =
     `<span>${mqText.repeat(3)}</span><span>${mqText.repeat(3)}</span>`;
 

@@ -10,16 +10,10 @@
 
 export const SITE = {
 
+  /* 只保留联系方式；姓名 / 学校 / 城市等个人信息不写入源码 */
   profile: {
-    name:      '郭锦涛',
-    nameEn:    'GUO JINTAO',
-    role:      '建筑学',
-    roleEn:    'ARCHITECTURE',
-    period:    '2022—2026',
-    school:    '江西师范大学 · 城市建设学院',
-    email:     '1278267210@qq.com',
-    wechat:    'kaku_101',
-    location:  '江西 · 南昌',
+    email:  '1278267210@qq.com',
+    wechat: 'kaku_101',
   },
 
   /* ---------- L1 板块（封面是最上一级的独立板块，不进导航；
@@ -32,7 +26,7 @@ export const SITE = {
     { id: 'about',    nav: '关于我',   navEn: 'ABOUT',    ready: false },
   ],
 
-  /* ---------- 封面（对齐 yourbana.com：巨型字母逐字堆叠的海报构图） ----------
+  /* ---------- 封面（巨型字母逐字堆叠的海报构图） ----------
      style: 'gold' 实心金 | 'ink' 实心鼠尾草 | 'outline' 描边空心
      每个字母独立动画 + 偶数字母微沉，形成贴纸字节奏 */
   cover: {
@@ -43,21 +37,15 @@ export const SITE = {
     tag: 'SELECTED WORKS · ARCHITECTURE',
   },
 
-  /* ---------- 关于我（版式对齐 aristidebenoist.com/about：
-     左侧巨型字标 + 右侧键位数据列；EMAIL / WECHAT 收在此板块） ---------- */
+  /* ---------- 关于我（板块当前关闭，ready 置 false）：
+     只留专业方向与联系方式，不写姓名 / 学校 / 城市等个人信息 ---------- */
   about: {
     wordmark: [
       { text: 'KAMGO', style: 'gold' },
       { text: '320',   style: 'ink'  },
     ],
-    status: ['建筑学 · 2026 届 · 求职中', 'OPEN TO WORK'],
+    status: ['建筑学 · 求职中', 'OPEN TO WORK'],
     cols: [
-      { head: 'PROFILE', rows: [
-        { key: 'A', label: 'NAME',   text: '郭锦涛 GUO JINTAO' },
-        { key: 'B', label: 'SCHOOL', text: '江西师范大学 · 城市建设学院' },
-        { key: 'C', label: 'MAJOR',  text: '建筑学 ARCHITECTURE' },
-        { key: 'D', label: 'BASE',   text: '江西 · 南昌' },
-      ]},
       { head: 'FOCUS', rows: [
         { key: 'A', label: 'DESIGN',  text: '建筑设计 / 城市设计' },
         { key: 'B', label: 'EXPRESS', text: '制图 · 模型 · 空间叙事' },

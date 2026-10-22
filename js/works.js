@@ -1,12 +1,11 @@
 /* works.js — L2 卡片阵列 + L3 满屏横向长卷
-   对齐 aristidebenoist.com：
    · 竖向长卡（h≈30vh，ar 1/3.7 窄条，默认压暗，悬停点亮）
    · 展开/退出 = transform FLIP（GPU 合成，丝滑缩放感）
    · 长卷 = 无极滑动：滚轮/拖拽连续位移 + 惯性 + 松手软吸附
    · 详情页自由缩放：Ctrl+滚轮 / 双击 / 双指捏合，放大后可拖拽平移
    ================================================================ */
 
-import { clamp, Glide } from './utils.js?v=14';
+import { clamp, Glide } from './utils.js?v=15';
 
 const FLIP_DUR = 950;
 const FLIP_EASE = 'cubic-bezier(.85, 0, .15, 1)';

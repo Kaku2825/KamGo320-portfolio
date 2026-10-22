@@ -1,10 +1,10 @@
 /* main.js — 应用入口：板块推进 / 导航 / 刻度 / hash 路由 */
 
-import { SITE } from './data.js?v=14';
-import { onFrame } from './utils.js?v=14';
-import { renderCover } from './cover.js?v=14';
-import { WorksSection } from './works.js?v=14';
-import { renderAbout } from './about.js?v=14';
+import { SITE } from './data.js?v=15';
+import { onFrame } from './utils.js?v=15';
+import { renderCover } from './cover.js?v=15';
+import { WorksSection } from './works.js?v=15';
+import { renderAbout } from './about.js?v=15';
 
 class App {
   constructor() {

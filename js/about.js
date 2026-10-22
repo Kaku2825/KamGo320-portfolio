@@ -1,9 +1,8 @@
 /* about.js — 关于我板块
-   版式对齐 aristidebenoist.com/about：
    左侧巨型字标（Big Shoulders）+ 底部状态行，
-   右侧 A/B/C 键位数据列（PROFILE / FOCUS / CONTACT）。 */
+   右侧 A/B/C 键位数据列（FOCUS / CONTACT）。 */
 
-import { SITE } from './data.js?v=14';
+import { SITE } from './data.js?v=15';
 
 export function renderAbout(el, app) {
   const a = SITE.about;
