@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>郭锦涛 · 建筑学作品集</title>
+  <meta name="description" content="郭锦涛的建筑学作品集——在线个人主页，精选作品 2022—2026。">
+  <meta property="og:title" content="郭锦涛 · 建筑学作品集">
+  <meta property="og:description" content="Selected Works 2022—2026">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='7' height='18' fill='%23CC9933'/%3E%3Crect x='17' y='7' width='7' height='18' fill='%23d8dbd3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/main.css?v=16">
+</head>
+<body>
+
+  <!-- 固定外框：四角信息 + 顶部刻度，所有板块之上 -->
+  <header class="frame frame-top">
+    <a class="frame-logo" href="#cover" data-nav="cover" aria-label="KamGo320 — 返回封面">KamGo320</a>
+    <nav class="frame-nav">
+      <!-- js/data.js blocks 渲染 -->
+    </nav>
+  </header>
+
+  <footer class="frame frame-bottom">
+    <a class="frame-corner frame-bl" href="#works" data-nav="works" title="返回作品索引">
+      <span>作品索引</span>
+      <span class="dim" id="index-count">INDEX — 05 PROJECTS</span>
+    </a>
+    <div class="frame-corner frame-br">
+      <a href="mailto:1278267210@qq.com">EMAIL</a>
+      <a href="#" data-copy="kaku_101">WECHAT</a>
+    </div>
+  </footer>
+
+  <!-- 板块舞台：cover / works / about 三层，横向推进切换 -->
+  <main class="stage" id="stage">
+    <section class="section" id="sec-cover" data-section="cover"></section>
+    <section class="section" id="sec-works"  data-section="works"></section>
+    <section class="section" id="sec-about"  data-section="about"></section>
+  </main>
+
+  <!-- 顶部进度刻度：独立于外框，详情遮罩之下也要可见 -->
+  <div class="frame-ticks" id="ticks" aria-hidden="true"></div>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="js/main.js?v=14"></script>
+</body>
+</html>
